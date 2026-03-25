@@ -457,7 +457,7 @@
     .hist-empty { font-size: 13px; color: var(--sub); text-align: center; padding: 12px 0; }
 
     /* Schedule table */
-    .sched-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .sched-table { width: auto; min-width: 100%; border-collapse: collapse; font-size: 12px; }
     .sched-table th { background: #f8fafc; padding: 7px; text-align: right; font-weight: 600; color: var(--sub); font-size: 10px; white-space: nowrap; }
     .sched-table th:first-child { text-align: center; }
     .sched-table td { padding: 7px; text-align: right; border-top: 1px solid var(--border); white-space: nowrap; font-size: 11px; }
@@ -549,6 +549,14 @@
     }
     .toggle-wrap input:checked + .toggle-slider { background: var(--primary); }
     .toggle-wrap input:checked + .toggle-slider::after { transform: translateX(20px); }
+    .reminder-day-btn {
+      padding: 5px 12px; border: 1.5px solid var(--border); border-radius: 20px;
+      background: #fff; color: var(--sub); font-size: 13px; cursor: pointer; transition: all .15s;
+    }
+    .reminder-day-btn.active {
+      background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 600;
+    }
+    #reminder-day-row.disabled { opacity: 0.4; pointer-events: none; }
     .settings-select {
       padding: 6px 10px; border: 1.5px solid var(--border); border-radius: 8px;
       font-size: 14px; font-family: inherit; color: var(--text); background: #fff;
@@ -976,12 +984,21 @@
     <div class="settings-row">
       <div>
         <div class="settings-label">返済リマインダー通知</div>
-        <div class="settings-desc">返済期限日に未返済の場合に通知します</div>
+        <div class="settings-desc">返済期限に未返済の場合に通知します</div>
       </div>
       <label class="toggle-wrap">
         <input type="checkbox" id="notif-toggle" onchange="toggleNotification()">
         <span class="toggle-slider"></span>
       </label>
+    </div>
+    <div id="reminder-day-row" style="margin-top:10px">
+      <div class="settings-desc" style="margin-bottom:8px">通知タイミング</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="reminder-day-btn active" data-days="0" onclick="setReminderDay(0)">当日</button>
+        <button class="reminder-day-btn" data-days="1" onclick="setReminderDay(1)">1日前</button>
+        <button class="reminder-day-btn" data-days="3" onclick="setReminderDay(3)">3日前</button>
+        <button class="reminder-day-btn" data-days="7" onclick="setReminderDay(7)">7日前</button>
+      </div>
     </div>
     <div style="border-top:1px solid var(--border);margin-top:12px;padding-top:12px">
       <div class="settings-label" style="margin-bottom:8px">💾 データ管理</div>
@@ -1319,6 +1336,7 @@ function loadSettings() {
 function saveSettings() {
   const s = {
     notificationsEnabled: document.getElementById('notif-toggle').checked,
+    reminderDaysBefore: parseInt(document.querySelector('.reminder-day-btn.active')?.dataset.days ?? 0),
   };
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
 }
@@ -1652,7 +1670,15 @@ function renderDashboard() {
     updateMonthlyBadge([]);
     return;
   }
-  list.innerHTML = debts.map(renderDebtCard).join('');
+  const sortedDebts = [...debts].sort((a, b) => {
+    const rank = d => {
+      if (d.balance <= 0) return 2;                          // 完済済み → 最下位
+      if (isPaidThisMonth(d) || isSkippedThisMonth(d)) return 1; // 今月済み → 中位
+      return 0;                                              // 未返済 → 最上位
+    };
+    return rank(a) - rank(b);
+  });
+  list.innerHTML = sortedDebts.map(renderDebtCard).join('');
   updateMonthlyBadge(debts.filter(d => d.balance > 0));
 }
 
@@ -1772,6 +1798,15 @@ function updateReminderDayState() {
   const enabled = document.getElementById('notif-toggle') && document.getElementById('notif-toggle').checked;
   const row = document.getElementById('reminder-day-row');
   if (row) row.classList.toggle('disabled', !enabled);
+}
+function setReminderDay(days) {
+  setReminderDayUI(days);
+  saveSettings();
+}
+function setReminderDayUI(days) {
+  document.querySelectorAll('.reminder-day-btn').forEach(btn => {
+    btn.classList.toggle('active', parseInt(btn.dataset.days) === days);
+  });
 }
 
 // ============================================================
@@ -2575,14 +2610,14 @@ function buildDetailHtml(debt) {
         : p.type === 'extra' ? '<span class="phi-type-badge extra">繰り上げ返済</span>' : '';
       const amountStr = p.type === 'skip' ? '<span style="color:var(--sub)">―</span>' : fmt(p.amount);
       const detailStr = p.type === 'skip' ? '<span style="color:var(--sub)">返済なし</span>'
-        : p.type === 'extra' ? '元金 ' + fmt(p.principal) + '（全額充当）'
-        : '元金 ' + fmt(p.principal) + ' / 利息 ' + fmt(p.interest);
+        : p.type === 'extra' ? '全額元金充当'
+        : '';
       return `
       <div class="pay-hist-item" style="position:relative">
         <div class="phi-date">${fmtDate(p.date)}</div>
         <div style="flex:1">
           <div class="phi-amount">${amountStr}${typeBadge}</div>
-          <div class="phi-detail">${detailStr}</div>
+          ${detailStr ? `<div class="phi-detail">${detailStr}</div>` : ''}
         </div>
         <div class="phi-right" style="display:flex;align-items:center;gap:8px">
           <div>
@@ -2935,6 +2970,7 @@ function submitFeedback() {
 function openSettings() {
   const s = loadSettings();
   document.getElementById('notif-toggle').checked = !!s.notificationsEnabled;
+  setReminderDayUI(s.reminderDaysBefore || 0);
   updateReminderDayState();
   openSheet('settings-sheet');
 }
@@ -2961,13 +2997,15 @@ function checkPaymentReminders() {
   const today = getNow().getDate();
   const thisMonth = getCurrentMonth();
 
+  const reminderDays = s.reminderDaysBefore || 0;
   const toNotify = loadDebts().filter(d => {
     if (d.balance <= 0) return false;
     if (d.notifyEnabled === false) return false;
     if (!d.paymentDay || d.paymentDay < 1) return false;
     if (isPaidThisMonth(d) || isSkippedThisMonth(d)) return false;
     const payDay = d.paymentDay >= 99 ? new Date(getNow().getFullYear(), getNow().getMonth() + 1, 0).getDate() : d.paymentDay;
-    if (today !== payDay) return false;
+    const notifyDay = Math.max(1, payDay - reminderDays);
+    if (today !== notifyDay) return false;
     const lastCheck = localStorage.getItem('lastReminderCheck_' + d.id);
     return lastCheck !== thisMonth;
   });
