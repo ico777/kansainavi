@@ -1985,8 +1985,10 @@ function renderMonthlyCard(debt) {
     <div class="mo-amount">${fmt(bd.actualPayment)}</div>
     <div class="mo-breakdown">
       <div class="mo-bk-item"><div class="mo-bk-label">元金</div><div class="mo-bk-value principal">${fmt(bd.principal)}</div></div>
-      <div class="mo-bk-item" style="border-left:1px solid var(--border);border-right:1px solid var(--border)"><div class="mo-bk-label">利息</div><div class="mo-bk-value interest">${fmt(bd.interest)}</div></div>
-      <div class="mo-bk-item"><div class="mo-bk-label">返済後残高</div><div class="mo-bk-value">${fmt(newBal)}</div></div>
+      <div class="mo-bk-item" style="color:var(--border)">／</div>
+      <div class="mo-bk-item"><div class="mo-bk-label">利息</div><div class="mo-bk-value interest">${fmt(bd.interest)}</div></div>
+      <div class="mo-bk-item" style="color:var(--border)">／</div>
+      <div class="mo-bk-item"><div class="mo-bk-label">残高</div><div class="mo-bk-value">${fmt(newBal)}</div></div>
     </div>
     ${action}
     ${dueDateRow}
