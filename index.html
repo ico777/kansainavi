@@ -3067,8 +3067,10 @@ document.addEventListener('DOMContentLoaded', () => {
     <p>本アプリの使用により生じたいかなる損害についても、開発者は責任を負いません。自己責任のもとでご利用ください。</p>
     <h3>データの管理</h3>
     <p>入力データはお使いの端末内にのみ保存されます。端末の紛失・初期化等によるデータ消失について、開発者は責任を負いません。定期的なバックアップを推奨します。</p>
+    <h3>知的財産権</h3>
+    <p>本アプリのデザイン・ソースコード・コンテンツに関する著作権その他の知的財産権は、開発者に帰属します。</p>
     <h3>禁止事項</h3>
-    <p>本アプリを違法な目的で使用すること、または第三者の権利を侵害する目的で使用することを禁じます。</p>
+    <p>以下の行為を禁止します。<br>・本アプリを違法な目的または第三者の権利を侵害する目的で使用すること<br>・本アプリのデザイン・ソースコード・コンテンツを無断で複製・改変・再配布すること<br>・本アプリを商業目的で無断利用すること</p>
     <p style="color:var(--sub);font-size:11px;margin-top:16px">最終更新：2026年3月</p>
   </div>
 </div>
@@ -3186,6 +3188,9 @@ function openTermsSheet() {
 
 function closeFullModal(id) {
   document.getElementById(id).classList.remove('show');
+  if ((id === 'terms-modal' || id === 'privacy-modal') && !localStorage.getItem('kansainavi_terms_agreed')) {
+    document.getElementById('terms-agree-modal').style.display = 'flex';
+  }
 }
 </script>
 </body>
