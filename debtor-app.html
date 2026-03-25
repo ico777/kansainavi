@@ -1814,7 +1814,10 @@ function setReminderDayUI(days) {
 // ============================================================
 function renderMonthlyView() {
   const debts = loadDebts();
-  const active = debts.filter(d => d.balance > 0);
+  const active = debts.filter(d => d.balance > 0).sort((a, b) => {
+    const rank = d => (isPaidThisMonth(d) || isSkippedThisMonth(d)) ? 1 : 0;
+    return rank(a) - rank(b);
+  });
   const paidN  = active.filter(d => isPaidThisMonth(d) || isSkippedThisMonth(d)).length;
   const total  = active.length;
   const pct    = total > 0 ? Math.round(paidN / total * 100) : 0;
