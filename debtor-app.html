@@ -987,10 +987,8 @@
       <div class="settings-label" style="margin-bottom:8px">💾 データ管理</div>
       <div style="display:flex;gap:8px">
         <button class="btn btn-secondary btn-sm" style="flex:1" onclick="exportData()">⬇️ バックアップ</button>
-        <label class="btn btn-secondary btn-sm" style="flex:1;text-align:center;cursor:pointer">
-          ⬆️ 復元
-          <input type="file" accept=".json" onchange="importData(event)" style="display:none">
-        </label>
+        <button class="btn btn-secondary btn-sm" style="flex:1" onclick="showRestoreConfirm()">⬆️ 復元</button>
+        <input type="file" id="restore-file-input" accept=".json" onchange="importData(event)" style="display:none">
       </div>
       <div style="font-size:11px;color:var(--sub);margin-top:5px">機種変更や機能変更前にバックアップを推奨します</div>
     </div>
@@ -1008,6 +1006,51 @@
     <div style="text-align:center;font-size:11px;color:var(--sub);margin-top:10px;padding-bottom:4px">
       完済ナビ v1.0.0
     </div>
+  </div>
+</div>
+
+<!-- BACKUP INFO SHEET -->
+<div class="sheet" id="backup-info-sheet">
+  <div class="sh-handle"></div>
+  <div class="sh-head">
+    <span class="sh-title">⬇️ バックアップ完了</span>
+    <button class="sh-close" onclick="closeAllSheets()">✕</button>
+  </div>
+  <div class="sh-body">
+    <div style="background:#f0fdf4;border-radius:12px;padding:14px 16px;margin-bottom:16px">
+      <div style="font-size:13px;font-weight:700;color:#15803d;margin-bottom:6px">✅ ファイルを作成しました</div>
+      <div style="font-size:12px;color:#166534;line-height:1.7">「完済ナビ_日付.json」という名前で<br>保存できます</div>
+    </div>
+    <div style="font-size:13px;font-weight:700;margin-bottom:10px">📱 iPhoneでの保存手順</div>
+    <div style="font-size:13px;color:var(--text);line-height:1.8">
+      <div style="display:flex;gap:10px;margin-bottom:8px"><span style="background:var(--primary);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700">1</span><span>画面上部にファイルのプレビューが表示されます</span></div>
+      <div style="display:flex;gap:10px;margin-bottom:8px"><span style="background:var(--primary);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700">2</span><span>プレビューをタップして「共有」アイコンを押す</span></div>
+      <div style="display:flex;gap:10px"><span style="background:var(--primary);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700">3</span><span>「ファイルに保存」→ iCloud Drive や本体に保存</span></div>
+    </div>
+    <div style="font-size:11px;color:var(--sub);margin-top:14px">機種変更や修理の前に保存しておくと安心です</div>
+  </div>
+</div>
+
+<!-- RESTORE CONFIRM SHEET -->
+<div class="sheet" id="restore-confirm-sheet">
+  <div class="sh-handle"></div>
+  <div class="sh-head">
+    <span class="sh-title">⬆️ データを復元</span>
+    <button class="sh-close" onclick="closeAllSheets()">✕</button>
+  </div>
+  <div class="sh-body">
+    <div style="background:#fff7ed;border-radius:12px;padding:14px 16px;margin-bottom:16px">
+      <div style="font-size:13px;font-weight:700;color:#c2410c;margin-bottom:6px">⚠️ 注意</div>
+      <div style="font-size:12px;color:#9a3412;line-height:1.7">現在のデータはすべて<strong>バックアップファイルの内容で上書き</strong>されます。元に戻せません。</div>
+    </div>
+    <div style="font-size:13px;font-weight:700;margin-bottom:10px">📱 iPhoneでの手順</div>
+    <div style="font-size:13px;color:var(--text);line-height:1.8">
+      <div style="display:flex;gap:10px;margin-bottom:8px"><span style="background:var(--primary);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700">1</span><span>「ファイルを選択」を押す</span></div>
+      <div style="display:flex;gap:10px;margin-bottom:8px"><span style="background:var(--primary);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700">2</span><span>保存済みの「完済ナビ_日付.json」を選ぶ</span></div>
+      <div style="display:flex;gap:10px"><span style="background:var(--primary);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700">3</span><span>自動でデータが復元されます</span></div>
+    </div>
+    <button class="btn btn-block" style="margin-top:20px;background:var(--primary);color:#fff" onclick="triggerRestore()">📂 ファイルを選択して復元</button>
+    <button class="btn btn-block" style="margin-top:8px;background:#f8fafc;color:var(--text);border:1.5px solid var(--border)" onclick="closeAllSheets()">キャンセル</button>
   </div>
 </div>
 
@@ -2953,7 +2996,17 @@ function exportData() {
   a.href = URL.createObjectURL(blob);
   a.download = '完済ナビ_' + todayStr() + '.json';
   a.click();
-  showToast('エクスポートしました');
+  closeAllSheets();
+  setTimeout(() => openSheet('backup-info-sheet'), 300);
+}
+
+function showRestoreConfirm() {
+  closeAllSheets();
+  setTimeout(() => openSheet('restore-confirm-sheet'), 300);
+}
+
+function triggerRestore() {
+  document.getElementById('restore-file-input').click();
 }
 
 function importData(event) {
@@ -2984,7 +3037,7 @@ function openSheet(id) {
 function closeAllSheets() {
   const overlay = document.getElementById('overlay');
   overlay.classList.remove('visible');
-  ['form-sheet','payment-sheet','extra-payment-sheet','settings-sheet','feedback-sheet','privacy-modal','terms-modal'].forEach(id => document.getElementById(id).classList.remove('show'));
+  ['form-sheet','payment-sheet','extra-payment-sheet','settings-sheet','feedback-sheet','backup-info-sheet','restore-confirm-sheet','privacy-modal','terms-modal'].forEach(id => document.getElementById(id).classList.remove('show'));
   setTimeout(() => overlay.classList.remove('show'), 220);
   _activeSheet = null;
 }
