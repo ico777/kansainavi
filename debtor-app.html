@@ -2989,12 +2989,29 @@ function checkPaymentReminders() {
 // ============================================================
 // EXPORT / IMPORT
 // ============================================================
-function exportData() {
+async function exportData() {
   const data = { debts: loadDebts(), settings: loadSettings(), exportedAt: new Date().toISOString() };
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const json = JSON.stringify(data, null, 2);
+  const fileName = '完済ナビ_' + todayStr() + '.json';
+  const blob = new Blob([json], { type: 'application/json' });
+
+  // iOS: Web Share API でネイティブ共有シートを表示
+  if (navigator.canShare) {
+    const file = new File([blob], fileName, { type: 'application/json' });
+    if (navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: '完済ナビ バックアップ' });
+      } catch(e) {
+        if (e.name !== 'AbortError') showToast('共有に失敗しました');
+      }
+      return;
+    }
+  }
+
+  // フォールバック: 通常ダウンロード
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = '完済ナビ_' + todayStr() + '.json';
+  a.download = fileName;
   a.click();
   closeAllSheets();
   setTimeout(() => openSheet('backup-info-sheet'), 300);
