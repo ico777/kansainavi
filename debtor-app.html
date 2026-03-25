@@ -1960,7 +1960,7 @@ function renderMonthlyCard(debt) {
   }
   const skipBtn = (!paid && !skipped) ? `<button class="mo-skip-btn" onclick="skipPayment('${debt.id}')">⏭ 今月はスキップ</button>` : '';
   const extraBtn = (!paid && !skipped && debt.balance > 0) ? `<button class="mo-extra-btn" onclick="openExtraPaymentSheet('${debt.id}')">✏️ 繰り上げ返済</button>` : '';
-  const subBtns = (skipBtn || extraBtn) ? `<div style="display:flex;gap:8px;margin-top:8px">${skipBtn}${extraBtn}</div>` : '';
+  const subBtns = (skipBtn || extraBtn) ? `<div style="display:flex;gap:6px;margin-top:5px">${skipBtn}${extraBtn}</div>` : '';
   const isPaidOrSkipped = paid || skipped;
   const nextDateStr = calcNextPaymentDate(debt);
   const daysUntilStr = calcDaysUntilPayment(debt);
