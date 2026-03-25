@@ -1911,8 +1911,8 @@ function renderMonthlyCard(debt) {
       pendingWarning = `<div class="overdue-warning">🚨 ${pendingItems}</div>`;
     }
     action = `<div class="paid-stamp">
-      <div style="font-size:17px;margin-bottom:4px">✅ 今月の返済は完了です！</div>
-      <div style="font-size:12px;font-weight:400;opacity:.8">次回の返済：${nextDateStr}</div>
+      <div style="font-size:13px;margin-bottom:2px">✅ 今月の返済は完了です！</div>
+      <div style="font-size:11px;font-weight:400;opacity:.8">次回の返済：${nextDateStr}</div>
     </div>
     <div style="display:flex;gap:8px;margin-top:8px">
       <button class="mo-undo-btn" style="flex:1;margin-top:0;min-width:0" onclick="undoPayment('${debt.id}','${lastPayment ? lastPayment.id : ''}')">↩ 取り消す</button>
