@@ -1670,15 +1670,7 @@ function renderDashboard() {
     updateMonthlyBadge([]);
     return;
   }
-  const sortedDebts = [...debts].sort((a, b) => {
-    const rank = d => {
-      if (d.balance <= 0) return 2;                          // 完済済み → 最下位
-      if (isPaidThisMonth(d) || isSkippedThisMonth(d)) return 1; // 今月済み → 中位
-      return 0;                                              // 未返済 → 最上位
-    };
-    return rank(a) - rank(b);
-  });
-  list.innerHTML = sortedDebts.map(renderDebtCard).join('');
+  list.innerHTML = debts.map(renderDebtCard).join('');
   updateMonthlyBadge(debts.filter(d => d.balance > 0));
 }
 
