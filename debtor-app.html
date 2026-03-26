@@ -1740,14 +1740,13 @@ function renderDebtCard(debt) {
   </div>
   <div class="dc-prog-wrap">
     <div class="dc-prog-bar"><div class="dc-prog-fill" style="width:${pct}%;background:${fillColor}"></div></div>
-    <div class="dc-prog-labels"><span class="dc-prog-pct">${pct}% 返済（${fmt(debtPaidPrin)}）</span><span class="dc-prog-remain">${isComplete ? '完済！' : 'あと' + fmtDur(sCurr ? sCurr.n : 0)}</span></div>
+    <div class="dc-prog-labels"><span class="dc-prog-pct">${pct}% 返済（${fmt(debtPaidPrin)}）</span><span class="dc-prog-remain">${isComplete ? '完済！' : ''}</span></div>
   </div>
   ${warn}
   <div class="dc-key-info">
     <div class="dc-ki"><div class="dc-ki-l">借入残高</div>${balVal}</div>
     <div class="dc-ki"><div class="dc-ki-l">次回返済額</div><span class="dc-ki-v">${isComplete ? '―' : fmt(bd.actualPayment)}</span></div>
     <div class="dc-ki"><div class="dc-ki-l">返済期限</div><span class="dc-ki-v">${isComplete ? '―' : calcNextPaymentDate(debt)}</span></div>
-    <div class="dc-ki"><div class="dc-ki-l">残日数</div><span class="dc-ki-v">${isComplete ? '―' : calcDaysUntilPayment(debt)}</span></div>
   </div>
   <button class="dc-loan-toggle" onclick="event.stopPropagation();toggleLoanInfo('${loanId}')">
     <span class="dc-sec-label">借入情報</span>
@@ -1759,7 +1758,7 @@ function renderDebtCard(debt) {
       <div class="ci"><div class="ci-l">年利率</div><div class="ci-v">${debt.annualRate}%</div></div>
       <div class="ci"><div class="ci-l">月返済額</div><div class="ci-v">${fmt(debt.monthlyPayment)}</div></div>
       <div class="ci"><div class="ci-l">支払総額（うち利息）</div><div class="ci-v">${paidTotalStr}（${paidIntStr}）</div></div>
-      <div class="ci"><div class="ci-l">残返済回数／総返済回数</div><div class="ci-v">${isComplete ? '0' : sCurr.unpayable ? '―' : sCurr.n}／${origN}</div></div>
+      <div class="ci"><div class="ci-l">返済回数</div><div class="ci-v">${isComplete ? '0' : sCurr.unpayable ? '―' : sCurr.n}回</div></div>
       <div class="ci"><div class="ci-l">完済予定月</div><div class="ci-v">${payoff}</div></div>
       <div class="ci"><div class="ci-l">これから支払う金額</div><div class="ci-v">${futureTotal}</div></div>
       <div class="ci"><div class="ci-l">完済までの支払総額</div><div class="ci-v">${isComplete ? fmt(debtPaidTotal) : isUnpayable ? '―' : fmt(debtPaidTotal + sCurr.total)}</div></div>
