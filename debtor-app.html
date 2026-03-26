@@ -256,7 +256,11 @@
     .mo-card.paid .mo-card-top { border-left: 4px solid var(--success); padding-left: 12px; }
     .mo-card-top { display: flex; align-items: center; gap: 8px; padding: 5px 12px 2px; }
     .mo-card-name { font-size: 15px; font-weight: 700; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .mo-card-body { padding: 0 12px 6px; }
+    .mo-card-body { padding: 0 12px 10px; }
+    .mo-due-inline { font-size: 11px; color: var(--sub); flex-shrink: 0; }
+    .mo-due-inline.urgent { color: var(--danger); font-weight: 600; }
+    .mo-sub-links { display: flex; gap: 12px; justify-content: center; margin-top: 6px; }
+    .mo-sub-links button { background: none; border: none; font-size: 12px; color: var(--sub); cursor: pointer; padding: 2px 0; font-family: inherit; }
     .mo-amount { font-size: 13px; font-weight: 700; margin-bottom: 0; }
     .mo-breakdown { display: flex; gap: 8px; margin-bottom: 5px; }
     .mo-bk-item { display:flex; align-items:baseline; gap:2px; }
@@ -452,9 +456,7 @@
     .phi-date { font-size: 12px; color: var(--sub); flex-shrink: 0; width: 74px; }
     .phi-amount { font-size: 14px; font-weight: 700; }
     .phi-detail { font-size: 11px; color: var(--sub); margin-top: 1px; }
-    .phi-right { text-align: right; flex-shrink: 0; }
-    .phi-balance { font-size: 12px; font-weight: 600; color: var(--text); }
-    .phi-balance-label { font-size: 10px; color: var(--sub); }
+    .phi-breakdown { font-size: 11px; font-weight: 400; color: var(--sub); margin-left: 4px; }
     .hist-empty { font-size: 13px; color: var(--sub); text-align: center; padding: 12px 0; }
 
     /* Schedule table */
@@ -1107,7 +1109,7 @@
   <div class="dv-header">
     <button class="dv-back" onclick="closeDetail()">← 戻る</button>
     <div class="dv-title" id="dv-title">詳細</div>
-    <button class="dv-pay-btn" id="dv-pay-btn" onclick="openPaymentSheet(currentDetailId)">💳 返済を記録</button>
+    <button class="dv-pay-btn" id="dv-pay-btn" onclick="closeDetail();switchTab('monthly')">💳 返済を記録</button>
   </div>
   <div class="dv-body" id="dv-body"></div>
 </div>
@@ -1964,7 +1966,7 @@ function renderMonthlyCard(debt) {
   }
   const skipBtn = (!paid && !skipped) ? `<button class="mo-skip-btn" onclick="skipPayment('${debt.id}')">⏭ 今月はスキップ</button>` : '';
   const extraBtn = (!paid && !skipped && debt.balance > 0) ? `<button class="mo-extra-btn" onclick="openExtraPaymentSheet('${debt.id}')">✏️ 繰り上げ返済</button>` : '';
-  const subBtns = (skipBtn || extraBtn) ? `<div style="display:flex;gap:6px;margin-top:5px">${skipBtn}${extraBtn}</div>` : '';
+  const subBtns = (skipBtn || extraBtn) ? `<div class="mo-sub-links">${skipBtn}${extraBtn}</div>` : '';
   const isPaidOrSkipped = paid || skipped;
   const nextDateStr = calcNextPaymentDate(debt);
   const daysUntilStr = calcDaysUntilPayment(debt);
@@ -1978,19 +1980,19 @@ function renderMonthlyCard(debt) {
         <span class="mo-due-days">${daysUntilStr}</span>
       </div>`
     : '';
+  const dueBadge = (!paid && !skipped && nextDateStr !== '―') ? `<span class="mo-due-inline${isUrgent ? ' urgent' : ''}">${nextDateStr}</span>` : '';
   return `
 <div class="mo-card ${skipped ? 'paid skipped-card' : paid ? 'paid' : ''}">
   <div class="mo-card-top" onclick="openDetail('${debt.id}')" style="cursor:pointer">
     <span class="mo-card-name">${escH(debt.creditorName)}</span>
     ${skipped ? '<span class="dc-badge skipped">⏭ スキップ</span>' : paid ? '<span class="dc-badge success">✓ 返済済み</span>' : '<span class="dc-badge unpaid">未返済</span>'}
+    ${dueBadge}
     <span class="dc-chevron">›</span>
   </div>
-  <div class="mo-card-body">
-    <div class="mo-amount">${fmt(bd.actualPayment)}</div>
+  ${(!paid && !skipped) ? `<div class="mo-card-body">
     ${action}
-    ${dueDateRow}
-    ${paid ? '' : subBtns}
-  </div>
+    ${subBtns}
+  </div>` : ''}
 </div>`;
 }
 
@@ -2608,15 +2610,6 @@ function buildDetailHtml(debt) {
   </div>
 </div>`;
 
-  // ── Extra payment button ──
-  const extraBtnHtml = debt.balance > 0 ? `
-<div class="dv-card" style="background:var(--purple-bg);border:1.5px solid var(--purple)">
-  <div class="dv-card-body" style="padding:14px;text-align:center">
-    <button class="btn btn-block" style="background:var(--purple);color:#fff;font-size:15px" onclick="openExtraPaymentSheet('${debt.id}')">💰 繰り上げ返済</button>
-    <div style="font-size:11px;color:var(--purple);margin-top:6px;opacity:.8">全額元金に充当されます</div>
-  </div>
-</div>` : '';
-
   // ── Payment history ──
   const hist = (debt.paymentHistory || []).slice().reverse();
   const histItems = hist.length
@@ -2624,6 +2617,8 @@ function buildDetailHtml(debt) {
       const typeBadge = p.type === 'skip' ? '<span class="phi-type-badge skip">スキップ</span>'
         : p.type === 'extra' ? '<span class="phi-type-badge extra">繰り上げ返済</span>' : '';
       const amountStr = p.type === 'skip' ? '<span style="color:var(--sub)">―</span>' : fmt(p.amount);
+      const breakdownStr = (p.type !== 'skip' && p.type !== 'extra' && p.principal != null && p.interest != null)
+        ? `<span class="phi-breakdown">（元金${fmt(p.principal)}／利息${fmt(p.interest)}）</span>` : '';
       const detailStr = p.type === 'skip' ? '<span style="color:var(--sub)">返済なし</span>'
         : p.type === 'extra' ? '全額元金充当'
         : '';
@@ -2631,16 +2626,10 @@ function buildDetailHtml(debt) {
       <div class="pay-hist-item" style="position:relative">
         <div class="phi-date">${fmtDate(p.date)}</div>
         <div style="flex:1">
-          <div class="phi-amount">${amountStr}${typeBadge}</div>
+          <div class="phi-amount">${amountStr}${breakdownStr}${typeBadge}</div>
           ${detailStr ? `<div class="phi-detail">${detailStr}</div>` : ''}
         </div>
-        <div class="phi-right" style="display:flex;align-items:center;gap:8px">
-          <div>
-            <div class="phi-balance">${fmt(p.balanceAfter)}</div>
-            <div class="phi-balance-label">返済後残高</div>
-          </div>
-          <button onclick="deletePaymentRecord('${debt.id}','${p.id}')" style="background:none;border:none;color:var(--danger);font-size:16px;cursor:pointer;padding:4px" title="削除">🗑</button>
-        </div>
+        <button onclick="deletePaymentRecord('${debt.id}','${p.id}')" style="background:none;border:none;color:var(--danger);font-size:16px;cursor:pointer;padding:4px" title="削除">🗑</button>
       </div>`;
     }).join('')
     : `<div class="hist-empty">返済記録がまだありません</div>`;
@@ -2681,7 +2670,7 @@ function buildDetailHtml(debt) {
 </div>`;
   }
 
-  return chartHtml + infoHtml + extraBtnHtml + simHtml + memoHtml + histHtml + schedHtml;
+  return chartHtml + infoHtml + simHtml + memoHtml + histHtml + schedHtml;
 }
 
 
