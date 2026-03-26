@@ -995,7 +995,7 @@
     <div class="settings-row">
       <div>
         <div class="settings-label">返済リマインダー通知</div>
-        <div class="settings-desc">返済期限に未返済の場合に通知します</div>
+        <div class="settings-desc">未返済の場合に通知します</div>
       </div>
       <label class="toggle-wrap">
         <input type="checkbox" id="notif-toggle" onchange="toggleNotification()">
@@ -2037,9 +2037,8 @@ function renderMonthlyCard(debt) {
 <div class="mo-card ${skipped ? 'paid skipped-card' : paid ? 'paid' : ''}">
   <div class="mo-card-top" onclick="openDetail('${debt.id}')" style="cursor:pointer">
     <span class="mo-card-name">${escH(debt.creditorName)}</span>
-    ${skipped ? '<span class="dc-badge skipped">⏭ スキップ</span>' : paid ? '<span class="dc-badge success">✓ 返済済み</span>' : '<span class="dc-badge unpaid">未返済</span>'}
     ${dueBadge}
-    ${(!paid && !skipped) ? '<span class="dc-chevron">›</span>' : ''}
+    ${skipped ? '<span class="dc-badge skipped">⏭ スキップ</span>' : paid ? '<span class="dc-badge success">✓ 返済済み</span>' : '<span class="dc-badge unpaid">未返済</span>'}
   </div>
   <div class="mo-card-body">
     ${action}
