@@ -63,6 +63,7 @@
     }
 
     /* ── MAIN ── */
+    #tab-container { position: relative; overflow: hidden; }
     .main {
       padding-top: calc(var(--header-h) + var(--safe-top) + 12px);
       padding-bottom: calc(var(--tab-h) + var(--safe-bot) + 120px);
@@ -800,10 +801,10 @@
 
 <!-- TAB BAR -->
 <nav class="tabbar">
-  <button class="tab-btn active" id="tab-btn-dashboard" onclick="switchTab('dashboard')">
+  <button class="tab-btn active" id="tab-btn-dashboard" onclick="switchTab('dashboard',true)">
     <span class="tab-icon">💳</span><span class="tab-label">債権者一覧</span>
   </button>
-  <button class="tab-btn" id="tab-btn-monthly" onclick="switchTab('monthly')">
+  <button class="tab-btn" id="tab-btn-monthly" onclick="switchTab('monthly',true)">
     <span class="tab-icon">📅</span><span class="tab-label">今月の返済</span>
     <span class="tab-badge" id="monthly-badge"></span>
   </button>
@@ -1111,7 +1112,7 @@
   <div class="dv-header">
     <button class="dv-back" onclick="closeDetail()">← 戻る</button>
     <div class="dv-title" id="dv-title">詳細</div>
-    <button class="dv-pay-btn" id="dv-pay-btn" onclick="closeDetail();switchTab('monthly')">💳 返済を記録</button>
+    <button class="dv-pay-btn" id="dv-pay-btn" onclick="closeDetail();switchTab('monthly',true)">💳 返済を記録</button>
   </div>
   <div class="dv-body" id="dv-body"></div>
 </div>
@@ -1611,14 +1612,40 @@ function closeCelebration() {
 // TAB SWITCHING
 // ============================================================
 let currentTab = 'dashboard';
-function switchTab(tab) {
-  currentTab = tab;
-  document.getElementById('tab-dashboard').style.display = tab === 'dashboard' ? '' : 'none';
-  document.getElementById('tab-monthly').style.display   = tab === 'monthly'   ? '' : 'none';
+let tabAnimating = false;
+function switchTab(tab, animate) {
+  if (tab === currentTab || tabAnimating) return;
+  const oldTab = document.getElementById('tab-' + currentTab);
+  const newTab = document.getElementById('tab-' + tab);
+  const goRight = (tab === 'monthly'); // dashboard→monthly = slide left, monthly→dashboard = slide right
+
   document.getElementById('fab').classList.toggle('hidden', tab !== 'dashboard');
   document.getElementById('tab-btn-dashboard').classList.toggle('active', tab === 'dashboard');
   document.getElementById('tab-btn-monthly').classList.toggle('active', tab === 'monthly');
   if (tab === 'monthly') renderMonthlyView();
+
+  if (animate) {
+    tabAnimating = true;
+    newTab.style.display = '';
+    newTab.style.position = 'absolute';
+    newTab.style.top = '0'; newTab.style.left = '0'; newTab.style.right = '0';
+    newTab.style.transform = `translateX(${goRight ? '100%' : '-100%'})`;
+    newTab.style.transition = 'transform .3s ease';
+    oldTab.style.transition = 'transform .3s ease';
+    oldTab.style.transform = `translateX(${goRight ? '-100%' : '100%'})`;
+    requestAnimationFrame(() => { newTab.style.transform = 'translateX(0)'; });
+    setTimeout(() => {
+      oldTab.style.display = 'none';
+      oldTab.style.transition = ''; oldTab.style.transform = '';
+      newTab.style.position = ''; newTab.style.transition = ''; newTab.style.transform = '';
+      newTab.style.top = ''; newTab.style.left = ''; newTab.style.right = '';
+      tabAnimating = false;
+    }, 300);
+  } else {
+    oldTab.style.display = 'none';
+    newTab.style.display = '';
+  }
+  currentTab = tab;
 }
 
 /* Tab swipe navigation */
@@ -1628,6 +1655,7 @@ function switchTab(tab) {
   const container = document.getElementById('tab-container');
   container.addEventListener('touchstart', e => {
     if (document.getElementById('detail-view').classList.contains('show')) return;
+    if (tabAnimating) return;
     sx = e.touches[0].clientX; sy = e.touches[0].clientY; swiping = true;
   }, {passive:true});
   container.addEventListener('touchmove', e => {
@@ -1638,8 +1666,8 @@ function switchTab(tab) {
     if (!swiping) return;
     const dx = e.changedTouches[0].clientX - sx;
     const idx = tabs.indexOf(currentTab);
-    if (dx < -60 && idx < tabs.length - 1) switchTab(tabs[idx + 1]);
-    else if (dx > 60 && idx > 0) switchTab(tabs[idx - 1]);
+    if (dx < -60 && idx < tabs.length - 1) switchTab(tabs[idx + 1], true);
+    else if (dx > 60 && idx > 0) switchTab(tabs[idx - 1], true);
     swiping = false;
   }, {passive:true});
 })();
