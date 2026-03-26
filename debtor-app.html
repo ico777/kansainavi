@@ -1989,10 +1989,10 @@ function renderMonthlyCard(debt) {
     ${dueBadge}
     <span class="dc-chevron">›</span>
   </div>
-  ${(!paid && !skipped) ? `<div class="mo-card-body">
+  <div class="mo-card-body">
     ${action}
-    ${subBtns}
-  </div>` : ''}
+    ${(!paid && !skipped) ? subBtns : ''}
+  </div>
 </div>`;
 }
 
