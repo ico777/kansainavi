@@ -185,7 +185,7 @@
     .ci-v.danger { color: var(--danger); }
 
     /* Key info row (always visible) */
-    .dc-key-info { display: grid; grid-template-columns: repeat(4,1fr); gap: 4px; padding: 8px 8px 10px; background: #f8fafc; border-top: 1px solid var(--border); }
+    .dc-key-info { display: grid; grid-template-columns: repeat(3,1fr); gap: 4px; padding: 8px 8px 10px; background: #f8fafc; border-top: 1px solid var(--border); }
     .dc-ki { background: #fff; border-radius: 8px; padding: 6px 8px; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
     .dc-ki-l { font-size: 10px; color: var(--sub); margin-bottom: 3px; }
     .dc-ki-v { font-size: 13px; font-weight: 700; color: var(--primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -393,6 +393,7 @@
       gap: 4px; -webkit-tap-highlight-color: transparent; font-family: inherit; flex-shrink: 0;
     }
     .dv-title { font-size: 16px; font-weight: 700; color: #fff; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .dv-pay-btn { background: #fff; border: none; border-radius: 10px; color: var(--primary); font-size: 13px; font-weight: 700; padding: 8px 14px; cursor: pointer; min-height: 40px; display: flex; align-items: center; gap: 4px; -webkit-tap-highlight-color: transparent; font-family: inherit; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
     .dv-body { padding: 12px; }
 
     .dv-card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 12px; overflow: hidden; }
@@ -1106,7 +1107,7 @@
   <div class="dv-header">
     <button class="dv-back" onclick="closeDetail()">← 戻る</button>
     <div class="dv-title" id="dv-title">詳細</div>
-    <button class="header-icon-btn" id="dv-pay-btn" onclick="openPaymentSheet(currentDetailId)" style="background:rgba(255,255,255,.2)">💳 返済を記録</button>
+    <button class="dv-pay-btn" id="dv-pay-btn" onclick="openPaymentSheet(currentDetailId)">💳 返済を記録</button>
   </div>
   <div class="dv-body" id="dv-body"></div>
 </div>
@@ -1986,13 +1987,6 @@ function renderMonthlyCard(debt) {
   </div>
   <div class="mo-card-body">
     <div class="mo-amount">${fmt(bd.actualPayment)}</div>
-    <div class="mo-breakdown">
-      <div class="mo-bk-item"><div class="mo-bk-label">元金</div><div class="mo-bk-value principal">${fmt(bd.principal)}</div></div>
-      <div class="mo-bk-item" style="color:var(--border)">／</div>
-      <div class="mo-bk-item"><div class="mo-bk-label">利息</div><div class="mo-bk-value interest">${fmt(bd.interest)}</div></div>
-      <div class="mo-bk-item" style="color:var(--border)">／</div>
-      <div class="mo-bk-item"><div class="mo-bk-label">残高</div><div class="mo-bk-value">${fmt(newBal)}</div></div>
-    </div>
     ${action}
     ${dueDateRow}
     ${paid ? '' : subBtns}
@@ -2520,6 +2514,27 @@ function closeDetail() {
   document.getElementById('detail-view').classList.remove('show');
   currentDetailId = null;
 }
+
+/* Swipe right to close detail view */
+(function(){
+  const dv = document.getElementById('detail-view');
+  let sx = 0, sy = 0, swiping = false;
+  dv.addEventListener('touchstart', e => { sx = e.touches[0].clientX; sy = e.touches[0].clientY; swiping = true; }, {passive:true});
+  dv.addEventListener('touchmove', e => {
+    if (!swiping) return;
+    const dx = e.touches[0].clientX - sx, dy = e.touches[0].clientY - sy;
+    if (Math.abs(dy) > Math.abs(dx)) { swiping = false; return; }
+    if (dx > 0) dv.style.transform = `translateX(${dx}px)`;
+  }, {passive:true});
+  dv.addEventListener('touchend', e => {
+    if (!swiping) { dv.style.transform = ''; return; }
+    const dx = e.changedTouches[0].clientX - sx;
+    if (dx > 100) { dv.style.transition = 'transform .2s'; dv.style.transform = 'translateX(100%)';
+      setTimeout(() => { closeDetail(); dv.style.transform = ''; dv.style.transition = ''; }, 200);
+    } else { dv.style.transition = 'transform .2s'; dv.style.transform = ''; setTimeout(() => dv.style.transition = '', 200); }
+    swiping = false;
+  }, {passive:true});
+})()
 
 function buildDetailHtml(debt) {
   const detailPaidPrin = calcPaidPrincipal(debt);
