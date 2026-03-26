@@ -1833,25 +1833,25 @@ function renderMonthlyView() {
 <div class="mo-header">
   <div class="mo-header-top">
     <span class="mo-month">${getCurrentMonthLabel()}</span>
-    <span class="mo-title">今月の返済</span>
+    ${allDone
+      ? '<span class="mo-title">今月の返済が完了しました！</span>'
+      : `<span class="mo-title">今月の返済</span>
     <div class="mo-count-badge">
       <span class="mo-count-done">${paidN}</span>
       <span class="mo-count-sep">/</span>
       <span class="mo-count-total">${total}</span>
       <span class="mo-count-label">件完了</span>
-    </div>
+    </div>`}
   </div>
-  <div class="mo-prog-wrap">
+  ${allDone ? '' : `<div class="mo-prog-wrap">
     <div class="mo-prog-track"><div class="mo-prog-fill" style="width:${pct}%"></div></div>
     <div class="mo-prog-pct">${pct}%</div>
-  </div>
+  </div>`}
   <div class="mo-chips">${chips}</div>
 </div>`;
 
   if (!total) {
     html += `<div class="empty"><div class="empty-icon">🎉</div><div class="empty-title">返済中の借金はありません</div><div class="empty-desc">借金一覧タブから追加しましょう</div></div>`;
-  } else if (allDone) {
-    html += `<div class="done-banner"><div class="icon">🎊</div><div class="title">今月の返済が完了しました！</div><div class="sub">お疲れさまです。来月もがんばりましょう！</div></div>`;
   }
 
   html += active.map(d => renderMonthlyCard(d)).join('');
@@ -2618,7 +2618,7 @@ function buildDetailHtml(debt) {
         : p.type === 'extra' ? '<span class="phi-type-badge extra">繰り上げ返済</span>' : '';
       const amountStr = p.type === 'skip' ? '<span style="color:var(--sub)">―</span>' : fmt(p.amount);
       const breakdownStr = (p.type !== 'skip' && p.type !== 'extra' && p.principal != null && p.interest != null)
-        ? `<span class="phi-breakdown">（元金${fmt(p.principal)}／利息${fmt(p.interest)}）</span>` : '';
+        ? `<div class="phi-breakdown" style="font-size:11px;color:var(--sub);margin-top:1px">元金${fmt(p.principal)}／利息${fmt(p.interest)}</div>` : '';
       const detailStr = p.type === 'skip' ? '<span style="color:var(--sub)">返済なし</span>'
         : p.type === 'extra' ? '全額元金充当'
         : '';
@@ -2626,7 +2626,8 @@ function buildDetailHtml(debt) {
       <div class="pay-hist-item" style="position:relative">
         <div class="phi-date">${fmtDate(p.date)}</div>
         <div style="flex:1">
-          <div class="phi-amount">${amountStr}${breakdownStr}${typeBadge}</div>
+          <div class="phi-amount">${amountStr}${typeBadge}</div>
+          ${breakdownStr}
           ${detailStr ? `<div class="phi-detail">${detailStr}</div>` : ''}
         </div>
         <button onclick="deletePaymentRecord('${debt.id}','${p.id}')" style="background:none;border:none;color:var(--danger);font-size:16px;cursor:pointer;padding:4px" title="削除">🗑</button>
