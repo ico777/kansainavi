@@ -780,7 +780,7 @@
       </div>
       <div class="oc-grid" style="grid-template-columns:1fr 1fr">
         <div class="oc-item"><div class="oc-item-label">これまで支払った金額</div><div class="oc-item-value" id="oc-paid">―</div><div id="oc-paid-detail" style="display:none"></div></div>
-        <div class="oc-item"><div class="oc-item-label">これから支払う金額</div><div class="oc-item-value" id="oc-future">―</div><div id="oc-future-int" style="display:none"></div></div>
+        <div class="oc-item"><div class="oc-item-label">支払予定金額</div><div class="oc-item-value" id="oc-future">―</div><div id="oc-future-int" style="display:none"></div></div>
       </div>
     </div>
   </div>
@@ -1816,7 +1816,7 @@ function renderDebtCard(debt) {
       <div class="ci"><div class="ci-l">支払総額</div><div class="ci-v">${paidTotalStr}</div></div>
       <div class="ci"><div class="ci-l">残返済回数</div><div class="ci-v">${isComplete ? '0' : sCurr.unpayable ? '―' : sCurr.n}回</div></div>
       <div class="ci"><div class="ci-l">完済予定月</div><div class="ci-v">${payoff}</div></div>
-      <div class="ci"><div class="ci-l">これから支払う金額</div><div class="ci-v">${futureTotal}</div></div>
+      <div class="ci"><div class="ci-l">支払予定金額</div><div class="ci-v">${futureTotal}</div></div>
       <div class="ci"><div class="ci-l">完済までの支払総額</div><div class="ci-v">${isComplete ? fmt(debtPaidTotal) : isUnpayable ? '―' : fmt(debtPaidTotal + sCurr.total)}</div></div>
     </div>
   </div>
@@ -3095,9 +3095,11 @@ async function exportData() {
     if (navigator.canShare({ files: [file] })) {
       try {
         await navigator.share({ files: [file], title: '完済ナビ バックアップ' });
+        showToast('✅ バックアップが完了しました', 'success');
       } catch(e) {
         if (e.name !== 'AbortError') showToast('共有に失敗しました');
       }
+      closeAllSheets();
       return;
     }
   }
