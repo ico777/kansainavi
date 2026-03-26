@@ -140,7 +140,7 @@
       -webkit-tap-highlight-color: transparent; flex-shrink: 0; color: var(--sub);
     }
     .icon-btn:active { opacity: .6; }
-    .icon-btn.del { background: #fee2e2; color: var(--danger); }
+    .icon-btn.del { background: #f1f5f9; color: var(--sub); }
 
     /* Progress bar on card */
     .dc-prog-wrap { padding: 10px 16px 0; }
@@ -165,7 +165,7 @@
     .dc-loan-toggle:active { background: #dbeafe; }
     .dc-loan-toggle-arrow { font-size: 16px; color: var(--primary); transition: transform .3s ease; }
     .dc-loan-toggle-arrow.open { transform: rotate(180deg); }
-    .dc-chevron { font-size: 36px; font-weight: 700; color: #888; margin-left: 6px; flex-shrink: 0; line-height: 1; pointer-events: none; }
+    .dc-chevron { font-size: 18px; font-weight: 700; color: var(--sub); margin-left: 6px; flex-shrink: 0; line-height: 1; pointer-events: none; }
     .pay-period-tab { padding:8px 12px; border-radius:8px; border:1.5px solid var(--border); background:#fff; font-size:12px; cursor:pointer; text-align:center; line-height:1.4; transition: background-color .2s, border-color .2s; }
     .pay-period-tab.selected { border-color:var(--primary); background:var(--primary); color:#fff; font-weight:600; }
     .pay-period-tab.paid { opacity:.5; border-color:#ccc; }
@@ -1760,8 +1760,8 @@ function renderDebtCard(debt) {
       <div class="ci"><div class="ci-l">借入金</div><div class="ci-v">${fmt(debt.originalBalance || debt.balance)}</div></div>
       <div class="ci"><div class="ci-l">年利率</div><div class="ci-v">${debt.annualRate}%</div></div>
       <div class="ci"><div class="ci-l">月返済額</div><div class="ci-v">${fmt(debt.monthlyPayment)}</div></div>
-      <div class="ci"><div class="ci-l">支払総額（うち利息）</div><div class="ci-v">${paidTotalStr}（${paidIntStr}）</div></div>
-      <div class="ci"><div class="ci-l">返済回数</div><div class="ci-v">${isComplete ? '0' : sCurr.unpayable ? '―' : sCurr.n}回</div></div>
+      <div class="ci"><div class="ci-l">支払総額</div><div class="ci-v">${paidTotalStr}</div></div>
+      <div class="ci"><div class="ci-l">残返済回数</div><div class="ci-v">${isComplete ? '0' : sCurr.unpayable ? '―' : sCurr.n}回</div></div>
       <div class="ci"><div class="ci-l">完済予定月</div><div class="ci-v">${payoff}</div></div>
       <div class="ci"><div class="ci-l">これから支払う金額</div><div class="ci-v">${futureTotal}</div></div>
       <div class="ci"><div class="ci-l">完済までの支払総額</div><div class="ci-v">${isComplete ? fmt(debtPaidTotal) : isUnpayable ? '―' : fmt(debtPaidTotal + sCurr.total)}</div></div>
@@ -1917,8 +1917,7 @@ function renderMonthlyCard(debt) {
       pendingWarning = `<div class="overdue-warning">🚨 ${pendingItems}</div>`;
     }
     action = `<div class="paid-stamp">
-      <div style="font-size:13px;margin-bottom:2px">✅ 今月の返済は完了です！</div>
-      <div style="font-size:11px;font-weight:400;opacity:.8">次回の返済：${nextDateStr}</div>
+      <div style="font-size:14px;font-weight:600">次回の返済：${nextDateStr}</div>
     </div>
     <div style="display:flex;gap:8px;margin-top:8px">
       <button class="mo-undo-btn" style="flex:1;margin-top:0;min-width:0" onclick="undoPayment('${debt.id}','${lastPayment ? lastPayment.id : ''}')">↩ 取り消す</button>
@@ -1987,7 +1986,7 @@ function renderMonthlyCard(debt) {
     <span class="mo-card-name">${escH(debt.creditorName)}</span>
     ${skipped ? '<span class="dc-badge skipped">⏭ スキップ</span>' : paid ? '<span class="dc-badge success">✓ 返済済み</span>' : '<span class="dc-badge unpaid">未返済</span>'}
     ${dueBadge}
-    <span class="dc-chevron">›</span>
+    ${(!paid && !skipped) ? '<span class="dc-chevron">›</span>' : ''}
   </div>
   <div class="mo-card-body">
     ${action}
