@@ -241,9 +241,9 @@
       display: flex; align-items: center; gap: 5px;
       background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3);
       border-radius: 20px; padding: 4px 12px; font-size: 13px; font-weight: 600;
-      transition: background .3s;
+      transition: background .3s; max-width: 100px; min-width: 0;
     }
-    .mo-chip-name { max-width: 5em; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; display: inline-block; }
+    .mo-chip-name { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; flex: 1; min-width: 0; }
     .mo-chip.done { background: rgba(255,255,255,.92); color: #0f766e; border-color: transparent; }
     .mo-chip.skipped { background: rgba(255,255,255,.15); border-color: rgba(255,200,50,.5); color: rgba(255,240,180,1); }
     .mo-chip-icon { font-size: 12px; }
