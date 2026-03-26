@@ -468,7 +468,9 @@
     .sched-note { font-size: 11px; color: var(--sub); padding: 6px 14px 10px; border-top: 1px solid var(--border); }
     .sched-omit td { text-align: center !important; color: var(--sub); font-size: 11px; padding: 8px; letter-spacing: .05em; background: #f8fafc; border-top: 1px dashed var(--border); border-bottom: 1px dashed var(--border); }
     @media (max-width: 480px) {
-      .sched-table th, .sched-table td { padding: 5px 3px; font-size: 10px; }
+      .sched-table th, .sched-table td { padding: 8px 6px; font-size: 10px; }
+      .sched-table th:first-child, .sched-table td:first-child { padding-left: 12px; width: 32px; }
+      .sched-table th:last-child, .sched-table td:last-child { padding-right: 12px; }
       .sched-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     }
 
