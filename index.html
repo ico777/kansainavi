@@ -1764,7 +1764,6 @@ function renderDebtCard(debt) {
     ${badge}
     <button class="icon-btn" onclick="event.stopPropagation();openForm('${debt.id}')" title="編集">✏️</button>
     <button class="icon-btn del" onclick="event.stopPropagation();deleteDebt('${debt.id}')" title="削除">🗑</button>
-    <span class="dc-chevron">›</span>
   </div>
   <div class="dc-prog-wrap">
     <div class="dc-prog-bar"><div class="dc-prog-fill" style="width:${pct}%;background:${fillColor}"></div></div>
