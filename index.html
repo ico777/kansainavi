@@ -243,6 +243,7 @@
       border-radius: 20px; padding: 4px 12px; font-size: 13px; font-weight: 600;
       transition: background .3s;
     }
+    .mo-chip-name { max-width: 5em; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; display: inline-block; }
     .mo-chip.done { background: rgba(255,255,255,.92); color: #0f766e; border-color: transparent; }
     .mo-chip.skipped { background: rgba(255,255,255,.15); border-color: rgba(255,200,50,.5); color: rgba(255,240,180,1); }
     .mo-chip-icon { font-size: 12px; }
@@ -1878,7 +1879,7 @@ function renderMonthlyView() {
     const skipped = isSkippedThisMonth(d);
     const cls     = done ? 'done' : skipped ? 'skipped' : '';
     const icon    = done ? '✓' : skipped ? '⏭' : '○';
-    return `<div class="mo-chip ${cls}"><span class="mo-chip-icon">${icon}</span>${escH(d.creditorName)}</div>`;
+    return `<div class="mo-chip ${cls}"><span class="mo-chip-icon">${icon}</span><span class="mo-chip-name">${escH(d.creditorName)}</span></div>`;
   }).join('');
 
   let html = `
